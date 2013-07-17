@@ -1,0 +1,117 @@
+		Release Notes for Scheme Prolog 1.2
+		-----------------------------------
+
+This release fixes a number of bugs which were present in the original
+(version 1.1) release.  Some minor enhancements are also present.
+
+
+BUGS FIXED
+----------
+
+() vs. #f
+
+    This release recognizes the difference between the empty list and
+    the false constant.  Older implementations of Scheme treated these
+    as identical, and the 1.1 release assumed this behaviour.  This
+    assumption is no longer made.
+
+repeated variables in arithmetic expressions
+
+    Two or more occurrences of the same variable in an arithmetic
+    expression (e.g., (add ?x ?x ?y)) were not handled correctly.
+    The interpreter now transforms such goals to remove multiple
+    occurrences (e.g., (add ?x ?x ?y) becomes (mult 2 ?x ?y)).
+
+retained-goal "leaks"
+
+    Retained arithmetic goals (i.e., those which are kept for later
+    re-execution upon further squeezing of their argument intervals)
+    were sometimes allowed to persist beyond backtracking out of the
+    invoking goal.  This no longer occurs.
+
+repetition of retained goals
+
+    A goal to be delayed on a variable used to show up more than once
+    in the variable's delay list, in certain situations, leading to
+    needless re-executions.  The interpreter now avoids this by not
+    delaying a goal on a variable if it is already so delayed.
+
+geq
+
+    geq goals were sometimes incorrectly retained.
+
+
+ENHANCEMENTS
+------------
+
+debugging
+
+    The user-level debugging (invoked via the `debug' builtin) now
+    produces more output.  This includes the display of goal numbers,
+    for easier cross reference by users; better tracking of the waking
+    of delayed goals upon variable instantiation; and tracking of the
+    lists of delayed goals on variables.
+
+solution output
+
+    The lists of floundered and splitting goals are now displayed with
+    only one goal per line, instead of all on a single line.
+
+retained-goal scheduling
+
+    Instead of executing retained goals immediately upon instantiation
+    of any variable upon which they are delayed, the interpreter now
+    queues these goals for later execution, following the completion of
+    the goal which is currently executing.  This avoids execution of
+    the same goal twice (or more) when two (or more) of its variables
+    become instantiated during execution of some other goal.
+
+location of files
+
+    It is no longer necessary to keep all system files and user files
+    together in the same directory.
+
+builtins
+
+    New built-in predicates include true, fail, and square, as well
+    as a number of arithmetic primitives used for internal purposes.
+
+examples
+
+    More examples of interval arithmetic are included.
+
+
+INSTALLATION
+------------
+
+The files comprising this release may be installed in any directory.
+The suggested approach is to install the Scheme sources for the pure
+Prolog interpreter in one directory, with the interval-arithmetic
+Scheme sources in a sub-directory named "Interval".  The system
+Prolog files ("builtin.pro" and "interval.pro") may reside in the
+same directory as the pure-Prolog Scheme sources.
+
+The file "prolog.ss" should be modified appropriately to reflect the
+installation location(s).  If the above approach is followed, only
+one definition need be changed:  prolog-source-prefix must be set to
+a string naming the installation directory.  A trailing slash (or
+other appropriate delimiter, for non-Unix systems) MUST BE INCLUDED,
+as the string is directly prepended to the names of the system Prolog
+files.
+
+If the interval-arithmetic Scheme sources or the system Prolog files
+are to reside in locations other than as described above, it is
+necessary to change the definitions of interval-source-prefix and
+prolog-source-prefix in "prolog.ss" appropriately.
+
+Since not all implementations of Scheme are identical, it may be
+necessary to provide certain definitions which are used by Scheme
+Prolog, but which your Scheme does not provide.  Such definitions
+should be added to "compatibility.ss".
+
+
+BUG REPORTING
+-------------
+
+Please report any bugs via email to dewar@cpsc.ucalgary.ca and/or to
+cleary@cpsc.ucalgary.ca.  Questions and comments are also welcome.

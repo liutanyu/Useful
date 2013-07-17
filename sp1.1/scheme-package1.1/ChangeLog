@@ -1,0 +1,130 @@
+1999-01-06  Version 1.1
+
+	* scheme.kernel.ScmScanner, scheme.kernel.ScmString:
+ 	  Fixed a bug in the 'read' function: The scanner now
+ 	  recognizes the characters '#\ ', #\(',  '#\)', '#\'',
+ 	  '#\`' and '#\;'. It also parse correctly strings.
+
+	* scheme.primitives.ScmLetstar:
+	  Fixed a bug in 'let*' construct: an environment is
+	  added on the top of the environment's stack even
+	  if the binding list is empty.
+
+	* scheme.primitives.ScmCharsToString, scheme.kernel.ScmString:
+	  Fixed a bug in 'string' procedure. It now produces
+	  a mutable string.
+
+	* scheme.primitives.ScmIsReal:
+	  Fixed a bug in 'real?': an integer is now a real (!)   .
+
+	* scheme.primitives.ScmDo:
+	  Fixed a bug in 'do' syntax.
+	
+	* scheme.kernel.ScmInputPort:
+	  Fixed a bug in input ports relative to the use
+	  or 'read-char' and 'read'.
+	
+	* scheme.primitives.ScmWriteChar:
+	  Fixed a bug in 'write-char': the output was incorrect.
+
+	* scheme.kernel.ScmVector, scheme.kernel.ScmPair:
+          Fixed a bug in 'display': the output of lists and
+	  vectors was incorrect.
+	
+	* scheme.kernel.ScmPromise:
+	  Fixed a bug in 'force' and 'delay' dealing with recursive
+	  'force' calls.
+	
+	* scheme.kernel.ScmInteger, scheme.kernel.ScmReal:
+	  Fixed a bug in the 'remainder' procedure.
+	
+	* scheme.kernel.ScmReal:
+	  Fixed a bug in the 'round' procedure.
+
+	* scheme.kernel.ScmStandardKernel, scheme.kernel.ScmNotImplemented:
+	  Added a 'not implemented' procedure that displays a
+	  message and returns #f. complex?, rational?, numerator,
+	  denominator, rationalize, make-rectangular, make-polar,
+	  real-part, imag-part, magnitude and angle are bound
+	  to an instance of this procedure.
+
+	* scheme.kernel.ScmStandardKernel, scheme.primitives.ScmGcd:
+	  Added the 'gcd' procedure.
+	
+	* scheme.kernel.ScmStandardKernel, scheme.primitives.ScmLcm:
+	  Added the 'lcm' procedure.
+
+	* scheme.extensions.ScmOpenInputString:
+	  Added 'open-input-string' procedure.
+
+	* scheme.extensions.ScmOpenOutputString:
+	  Added 'open-output-string' procedure.
+
+	* scheme.extensions.ScmIsOutputStringPort:
+	  Added 'output-string-port?' procedure.
+
+	* scheme.extensions.ScmWithInputFromString:
+	  Added 'with-input-from-string' procedure.
+
+	* scheme.extensions.ScmWithOutputToString:
+	  Added 'with-output-to-string' procedure.
+
+	* scheme.extensions.ScmCallWithInputString:
+	  Added 'call-with-input-string' procedure.
+
+	* scheme.extensions.ScmCallWithOutputString:
+	  Added 'call-with-output-string' procedure.
+	
+	* scheme.extensions.ScmAutoload, scheme.extensions.ScmCreateAutoload:
+	  Added a 'autoload' procedure.
+	
+	* scheme.extensions.ScmIsBound:
+	  Added a 'bound?' predicate.
+		
+	* scheme.extensions.ScmRandom:
+	  Added a 'random' procedure.
+		
+	* scheme.extensions.ScmIsPromise:
+	  Added a 'promise?' predicate.
+		
+	* scheme.extensions.ScmBitAnd:
+	  Added a 'bit-and' procedure.
+		
+	* scheme.extensions.ScmBitLsh:
+	  Added a 'bit-lsh' procedure.
+		
+	* scheme.extensions.ScmBitNot:
+	  Added a 'bit-not' procedure.
+		
+	* scheme.extensions.ScmBitOr:
+	  Added a 'bit-or' procedure.
+		
+	* scheme.extensions.ScmBitRsh:
+	  Added a 'bit-rsh' procedure.
+		
+	* scheme.extensions.ScmBitXor:
+	  Added a 'bit-xor' procedure.
+
+	* scheme.primitives.ScmQuasiquote:
+	  Fixed a bug in unquote-splicing.
+
+	* scheme.extensions.ScmSyntacticProcedure, scheme.extensions.ScmPSyntax:
+	  Added syntactic procedures created by 'syntax'
+	
+	* scheme.extensions.OScmSyntacticMethod,
+	* scheme.extensions.OScmDefineSyntacticMethod:
+	  Added syntactic methods created by 'syntax-method'
+
+	* scheme.extensions.OScmSuper:
+	  Fixed a bug in 'super' method
+
+	* scheme.kernel.ScmHashTable:
+	  Environments now use a specific hash table (a small clone of the
+	  standard Hashtable, but not synchronized). With this modification
+	  and some others (in error handling, ScmStack and ScmParser), the
+	  interpretation of scheme expressions runs 15% to 40% faster
+	  depending on the kind of expression interpreted.
+	
+1998-12-08  Version 1.0
+
+	* First release

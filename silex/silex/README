@@ -1,0 +1,40 @@
+Readme file for SILex version 1.0
+
+This software is Copyright (C) 1997 by Danny Dube', all rights reserved
+
+Description
+-----------
+
+SILex is a lexical analyser generator with a Lex-like syntax.
+
+Contents of the directory:
+
+README		This file.
+multilex.scm	Run-time module.
+silex.ps	Documentation in PostScript.
+silex.scm	The SILex program.
+silex.texi	Source of the documentation in Texinfo.
+
+Permissions
+-----------
+
+The program can be used freely for personal, educational or research
+purposes.  For any commercial use, the author must be contacted.
+
+The program can be modified as long as the permissions remain the same
+as they are now.
+
+This program is distributed in the hope that it will be useful, but
+without any warranty.
+
+Author
+------
+
+The author is Danny Dube'.
+
+Bug reports or other messages can be sent at:
+	dube@iro.umontreal.ca
+
+If you want to modify or improve the program yourself, you can get the
+sources in the home page of the author at:
+	http://www.iro.umontreal.ca/~dube

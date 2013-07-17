@@ -1,0 +1,271 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="Author" CONTENT="Administrateur">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [fr] (Win95; I) [Netscape]">
+   <TITLE>Scheme Objet Model</TITLE>
+</HEAD>
+<BODY>
+
+<H1>
+The scheme package Object Model</H1>
+
+<HR WIDTH="100%">
+<H2>
+1 - Basic ideas.</H2>
+The object model of the scheme package is defined as follow:
+<UL>
+<LI>
+all classes of the model, including the predefined class&nbsp; <B><TT>&lt;object></TT></B>,
+are instances of the predefined class <B><TT>&lt;class></TT></B>,</LI>
+
+<LI>
+the predefined class <B><TT>&lt;object> </TT></B>is the parent of all defined
+classes, including <B><TT>&lt;class> </TT></B>and itself,</LI>
+
+<LI>
+each class has one and only one direct parent,</LI>
+
+<LI>
+all user defined objects are instances of the class <B><TT>&lt;object></TT></B>,</LI>
+
+<LI>
+each object has an internal environment that contains all the fields (inherited
+or not) of his class and their values,</LI>
+
+<LI>
+objects (including classes) of the system are Scheme syntactic objects
+(they can be called like procedures but there arguments are not evaluated
+by the kernel),</LI>
+
+<LI>
+when an object is called, the first parameter must be a symbol mapped with
+a method or a <A HREF="syntax.html#syntax method">syntactic method</A>
+in the environment this object's class,</LI>
+
+<LI>
+methods are closures with a first hidden parameter that can be referred
+in the body of the method with the symbol <B><TT>this</TT></B>,</LI>
+
+<LI>
+methods are defined by the procedure <B>method</B> that as the same syntax
+as <B><TT>lambda</TT></B>,</LI>
+
+<LI>
+methods can be called in a closure-like way but with an extra parameter
+(it must be an object) in first position,</LI>
+
+<LI>
+when a method is called, the environment of <B><TT>this</TT></B> object
+is added to the method's one,</LI>
+
+<LI>
+when a parameter of a method has the same name as a field of <B><TT>this
+</TT></B>, the name refers to the parameter,</LI>
+
+<LI>
+<A HREF="syntax.html#syntax method">syntactic methods</A> are to methods
+what <A HREF="syntax.html#syntax">syntaxes</A> are to procedures.</LI>
+</UL>
+
+<H2>
+2 - Predefined methods.</H2>
+
+<H3>
+&nbsp;&nbsp;&nbsp; 1 - Methods of the class <B><TT>&lt;class></TT></B>.</H3>
+
+<TABLE BORDER >
+<TR>
+<TD><TT>(class&nbsp;<A NAME="define"></A><B>define</B> symbol object)</TT>&nbsp;
+<BR><TT>(class <B>define</B> (symbol ...) ...)</TT></TD>
+
+<TD>The first form creates in the environment of&nbsp; 'class' a new mapping
+of&nbsp; 'symbol' with the object 'object'. 'symbol' must not be quoted.&nbsp;
+<BR>The second form creates a method. The parameters are the same as for
+a procedure definition with <B><TT>define</TT></B>.&nbsp;
+<BR>Returns an undefined value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(class&nbsp;<A NAME="get"></A><B>get</B> symbol)</TT></TD>
+
+<TD>The symbol&nbsp; 'symbol' must not be quoted.&nbsp;
+<BR>Returns the value of the object named 'symbol' in the environement
+of&nbsp; 'class'</TD>
+</TR>
+
+<TR>
+<TD><TT>(class <B>get-parent</B>)</TT></TD>
+
+<TD>Returns the parent class of the class&nbsp; 'class'. It returns <B><TT>&lt;object></TT></B>
+applied on <B><TT>&lt;class></TT></B> and <B><TT>&lt;object></TT></B>.</TD>
+</TR>
+
+<TR>
+<TD><TT>(class&nbsp;<A NAME="make"></A><B>make</B>)</TT>&nbsp;
+<BR><TT>(<B>&lt;class> make</B> class (...))</TT></TD>
+
+<TD>The first form applies to all classes of the system except the class
+<B><TT>&lt;class></TT></B> , it creates an instance the class 'class'.
+The fields are initialised to an undefined value.&nbsp;
+<BR>The second form create a new class that is a child of the class 'class'.</TD>
+</TR>
+</TABLE>
+
+<H3>
+&nbsp;&nbsp;&nbsp; 2 - Methods of the class <B><TT>&lt;object></TT></B>.</H3>
+
+<TABLE BORDER >
+<TR>
+<TD><TT>(object <B>get-class</B>)</TT></TD>
+
+<TD>Returns the class of the object&nbsp; 'object'. It returns <B><TT>&lt;class></TT></B>
+applied on <B><TT>&lt;object></TT></B> and <B><TT>&lt;class></TT></B>.</TD>
+</TR>
+
+<TR>
+<TD><TT>(object <B>super</B> symbol ...)</TT></TD>
+
+<TD>Calls the first precursor method of the method named 'symbol' in the
+inheritance tree of the object 'object'.</TD>
+</TR>
+</TABLE>
+
+<H2>
+3 - Predefined procedures.</H2>
+
+<TABLE BORDER >
+<TR>
+<TD><TT>(<B>object?</B> obj)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'obj' is an instance of object, #f otherwise.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>method?</B> obj)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'obj' is a method, #f otherwise. Note that if an
+object is a method he is also a procedure.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<A NAME="method"></A><B>method</B> L exp ...)</TT></TD>
+
+<TD>Creates a method. It has the same syntax as <B><TT>lambda </TT></B>but
+returns a method.</TD>
+</TR>
+</TABLE>
+
+<H2>
+4 - Example.</H2>
+In the following example we define a class &lt;list> that encapsulate some
+of the functions that applies to Scheme lists.
+<BR><I>Notation</I>: The convention is the to write the name of a class
+beetween '&lt;' and '>', and to put a dot at the beginning of the name
+of a field. It is just a convention: every symbol can be used.
+
+<P><FONT COLOR="#993366">First, we define the class &lt;list> with fields
+.head and .size.</FONT>
+
+<P><TT>(define &lt;list> (&lt;class> make (.head .size)))</TT>
+
+<P><FONT COLOR="#993366">Now we can create a list by writing:</FONT>
+
+<P><TT>(define L (&lt;list> make))</TT>
+
+<P><FONT COLOR="#993366">The following statement creates an initialization
+method. It takes zero or one argument. The argument must be a list.</FONT>
+<BR><FONT COLOR="#993366">We can see in this example that fields of the
+list are variables of the method's current environment.</FONT>
+
+<P><TT>(&lt;list> define (init . L)</TT>
+<BR><TT>&nbsp; (cond ((null? L)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .head '())</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .size 0))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (else</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .head (car
+L))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .size (length
+L)))))</TT>
+
+<P><FONT COLOR="#993366">Here is the initialization of our list:</FONT>
+
+<P><TT>(L init '(1 3 2 4 1))</TT>
+
+<P><FONT COLOR="#993366">We can define a method that displays a readable
+representation of a list. Note that there is no ambiguity in the body of
+the method when we call procedure display since methods are defined as
+a field of the class of the current object.</FONT>
+
+<P><TT>(&lt;list> define (display)</TT>
+<BR><TT>&nbsp; (display this))</TT>
+
+<P><FONT COLOR="#993366">An other way to do that is:</FONT>
+
+<P><TT>(&lt;list> define display</TT>
+<BR><TT>&nbsp; (method ()</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp; (display this)))</TT>
+
+<P><FONT COLOR="#993366">To display our list we can write:</FONT>
+
+<P><TT>(L display) </TT><FONT COLOR="#993366">which produces the output:
+</FONT><TT><FONT COLOR="#000000">(1 3 2 4 1)</FONT></TT>
+
+<P><FONT COLOR="#993366">The next three methods respectively adds an element
+at the beginning of the list, remove an element and returns the length
+of the list.</FONT>
+
+<P><TT>(&lt;list> define (add obj)</TT>
+<BR><TT>&nbsp; (set! .list (cons obj .list)</TT>
+<BR><TT>&nbsp; (set! .size (+ .size 1)))</TT>
+
+<P><TT>(&lt;list> define (remove)</TT>
+<BR><TT>&nbsp; (if (not (null? .head))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (begin</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .head (cdr .head))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! .size (- .size
+1)))))</TT>
+
+<P><TT>(&lt;list> define (length)</TT>
+<BR><TT>&nbsp; .size)</TT>
+
+<P><FONT COLOR="#993366">This method definition demonstrates an important
+aspect of the method invocation: 'this' <I>must </I>be used to call the
+methods of the current object.</FONT>
+<BR><FONT COLOR="#993366">It also shows that I can write very inefficient
+methods ;-).</FONT>
+
+<P><TT>(&lt;list> define (occurences-of obj)</TT>
+<BR><TT>&nbsp; (if (= (this length) 0)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (let ((next ((this get-class) make)))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (next init (cdr .head))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (if (equal? obj (car
+.head))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(+ 1 (next occurences-of obj))</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(next occurences-of obj)))))</TT>
+
+<P><FONT COLOR="#993366">Methods can be called in a functional way: the
+first statement gets the value of the field 'number-of' of the class &lt;list>,
+the next shows how to call this method in a functional way on our previously
+created list and the two last demonstrate that methods can be used by a
+function that operate on procedures.</FONT>
+
+<P><TT><FONT COLOR="#000000">(define meth (&lt;list> get occurences-of))</FONT></TT>
+
+<P><TT>(meth L 1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+;; --> 2</TT>
+
+<P><TT>(apply meth L '(1))&nbsp; ;; --> 2</TT>
+<BR><TT>(map meth `((,L 1))) ;; --> 2</TT>
+
+<P>
+<HR WIDTH="100%">
+<ADDRESS>
+&nbsp;<A HREF="mailto:hillion@essi.fr">St&eacute;phane Hillion</A> - 1998</ADDRESS>
+
+<BR>&nbsp;
+</BODY>
+</HTML>

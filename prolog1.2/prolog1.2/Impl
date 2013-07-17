@@ -1,0 +1,257 @@
+		Scheme Prolog 1.2 Implementation Details
+		----------------------------------------
+
+
+Overview of Features
+--------------------
+
+Scheme Prolog 1.2 is an interpreter for pure Prolog.  It supports delayed
+goals (i.e., goals which are not executed until certain conditions are met,
+such as certain variables being bound) and is extensible to include predicates
+defined in Scheme.  The execution mechanism is based on continuations.  An
+interval-arithmetic package is also loaded by default, but is not described
+in detail here.
+
+
+Invocation and Syntax
+---------------------
+
+The interpreter is invoked by evaluating the following:
+	(pro "file"...)
+where "file"... is a sequence of names of Prolog source files.  The interpreter
+implicitly loads "builtin.pro" (and "interval.pro" if interval arithmetic is
+enabled) before loading the specified files.  Queries pertaining to the loaded
+files are then accepted.  The interpreter is exited by typing "q" to the query
+prompt.
+
+Prolog definitions consist of two parts:  a "when" part and a "what" or "how"
+part.  The "when" part specifies conditions under which a goal can proceed,
+and the "what" or "how" part specifies the meaning of the goal in terms of
+either Prolog (for "what" definitions) or Scheme (for "how" definitions).
+
+Typically, no "when" conditions would be specified, indicating that the goal
+is never delayed.  Such a declaration would have the following form:
+	(when (my-func ?arg1 ?arg2))
+One may also specify conditions of the following forms:
+	(when (my-func ?arg1 ?arg2) (nonvar ?arg1) (nonvar ?arg2))
+	(when (my-func ?arg1 ?arg2) (ground ?arg2))
+Taken together, these two declarations imply that my-func may be executed if
+and only if (a) both of its arguments are instantiated, or (b) its second
+argument is ground.
+
+A "what" definition has the following form:
+	(what (my-func ?arg1 ?arg2) (foo ?arg1) (bar ?arg2) (etc ?arg2))
+	(what (my-func fred ?arg))
+This is equivalent to the following Edinburgh Prolog definition:
+	my-func(Arg1,Arg2) :- foo(Arg1), bar(Arg2), etc(Arg2).
+	my-func(fred,Arg).
+
+Instead of providing a set of "what" clauses, one may provide a single "how"
+clause to define a predicate in Scheme, as follows:
+	(how (my-func ?arg1 ?arg2)
+	     (lambda (goal program s f) (scheme-stuff ...)))
+Only a single "how" clause is permitted.  The meanings of the arguments to
+the lambda expression are explained below, under "Execution".
+
+
+Internal Representations
+------------------------
+
+Internally, variables are represented as vectors having the following four
+components:  (1) a constant which is either 'uninst for an uninstantiated
+variable or 'inst for an instantiated variable; (2) a unique name for the
+particular instance of the variable (e.g., ?foo#6); (3) the value of the
+variable, if instantiated (otherwise, 'no-val); and (4) a difference list
+of delayed goals (actually predicates of the form #(when what how); refer
+to "pred.ss" for details) awaiting instantiation of the variable.  The file
+"terms.ss" implements much of the manipulation of variables.  Manipulation
+of difference lists is implemented by "dlists.ss".
+
+"When," "what" and "how" definitions are compiled into the forms described
+below.  This compilation is done by "compile.ss".
+
+A list of "when" clauses is compiled into a single procedure which returns
+#t if and only if its argument (a goal) is ready to run; i.e., if the "when"
+constraints for the goal are satisfied.  This procedure will be invoked
+before any instance of the goal is executed, allowing the goal to be delayed
+if necessary.
+
+A list of "what" clauses is compiled into a corresponding list of clause-
+instance-creating procedures.  Each such procedure returns a pair whose car
+represents the head of a clause and whose cdr is a list representing the
+goals in the body of the clause.  Variables are represented by their internal
+representation, as explained above.  Successive invocations of any clause-
+instance-creating procedure produce distinct clause instances, as evidenced
+by the differences in the variables in the clause instances.
+
+As an example of the invocation of a clause-instance-creating procedure,
+consider the following Prolog clause:
+	(what (my-func ?arg1 ?arg2) (foo ?arg1) (bar ?arg2) (etc ?arg2))
+This clause's clause-instance-creating procedure would return a structure
+of the following form:
+	( [my-func #(uninst ?arg1#1 no-val (()))
+		   #(uninst ?arg2#2 no-val (()))] .
+	  ( [foo #(uninst ?arg1#1 no-val (()))]
+	    [bar #(uninst ?arg2#2 no-val (()))]
+	    [etc #(uninst ?arg2#2 no-val (()))] )
+	)
+A second invocation would return a similar structure, but with different
+variables; e.g., instead of #(uninst ?arg1#1 no-val (())), the variable
+?arg1 might be represented by #(uninst ?arg1#3 no-val (())).
+
+A list of "how" clauses must consist of a single "how" definition, and
+is compiled directly into the specified Scheme procedure.  This procedure
+must accept three arguments:  the program (described below), a success
+continuation and a failure continuation.  Refer to the section entitled
+"Execution" below for a description of these continuations.  A simple
+example of a "how" clause is the one for "debug" in "builtin.pro".
+
+The compiled program consists of an association list (see "tables.ss"), each
+of whose elements represents one predicate.  A predicate is represented by a
+pair whose car is a constant of the form name/arity (e.g., append/3) and
+whose cdr is a vector having the following three elements:  (1) the compiled
+"when" clause for the predicate, (2) a list of the compiled "what" clauses
+(or an empty list if the predicate is defined by a "how" clause) and (3) the
+compiled "how" clause (or an empty list if the predicate is defined by "what"
+clauses).  A typical predicate definition would thus look something like this:
+	(append/3 . #(when-proc (what-proc-1 what-proc-2) ()))
+
+
+Execution
+---------
+
+The central part of the interpreter is defined in "search.ss".  Execution is
+based on continuations.  AND- and OR-handling procedures, as well as the
+unification procedure, conceptually do not return, but instead, as their last
+action, invoke one of two continuations (actually lambda expressions).  One
+of these is the "success" continuation, used to implement forward execution
+and invoked if the procedure is considered to have succeeded, and the other is
+the "failure" continuation, used to implement backtracking and invoked if the
+procedure is considered to have failed.  A "success" continuation will perform
+the remaining actions to be done; a "failure" continuation will undo any
+actions taken by the calling procedure and will initiate backtracking.
+
+There are three arguments which are supplied (among others) to the AND- and
+OR-handling procedures and unification.  These include the following:
+(1) program -- the compiled program, described above; (2) s -- the "success"
+continuation; and (3) f -- the "failure" continuation.
+
+A procedure (e.g., "and-node") invokes another procedure (e.g., "and-branch")
+as its last action, and, conceptually, does not expect the called procedure
+to return.  Instead, the calling procedure passes to the called procedure two
+continuations:  a "success" continuation and a "failure" continuation.  The
+called procedure will, directly or indirectly, invoke one of these.  If the
+calling procedure requires further actions to be taken upon completion of the
+called procedure, it places these actions into the "success" continuation
+passed to the called procedure.  In addition, actions to be taken upon failure
+may be placed by the caller in the "failure" continuation.
+
+The "failure" continuation is a zero-argument lambda expression which simply
+invokes some alternative action, such as trying a different clause in order
+to effect backtracking.  (It also undoes any actions which need to be undone
+before backtracking is commenced).  The "success" continuation is somewhat more
+complicated, as it must allow for future backtracking, and thus for possible
+future invocation of the "failure" continuation.  The "success" continuation
+therefore requires a single argument, consisting of a "failure" continuation
+which may be invoked in future.
+
+The primary routines which use the "success" and "failure" continuations are
+described in detail below.  "And-node" invokes "and-branch", which invokes
+"or-node", which invokes "or-branch", which invokes "and-node", completing
+the cycle.  The descriptions below are intended to be read while referring
+to the actual code in "search.ss".
+
+"And-node" has, as its first argument, a list ("terms") of goals to be
+executed.  These are typically the goals in the body of a clause.  If the
+list is empty, "and-node" succeeds by invoking its "success" continuation.
+Otherwise, one or more goals remain, and are invoked as follows.  The first
+goal is invoked, via "and-branch" (indirectly via "goal-first-try!", defined
+in "goals.ss" and described more fully below), and the remaining goals are
+placed in the "success" continuation passed to "and-branch" by prepending
+them to "and-node"'s "s" continuation.  The "success" continuation passed to
+"and-branch" is thus
+	(lambda (f) (and-node (cdr terms) program s f)).
+The "failure" continuation passed to "and-branch" is simply "and-node"'s
+"f" continuation.
+
+"And-branch" accepts a single goal as its first argument, and attempts to
+solve that goal.  For a goal defined by a "how" clause, "and-branch" directly
+invokes the supplied Scheme procedure.  For Prolog goals, defined by "what"
+clauses, "and-branch" passes execution to "or-node", passing its own "s" and
+"f" continuations (wrapped in some tracing/debugging code).
+
+"Or-node" has, as its first argument, a list ("clause-makers") of clause-
+instance-creation procedures, described above.  If this list is empty,
+"or-node" fails by invoking its "failure" continuation.  Otherwise, it tries
+the clause defined by the first such procedure, by invoking "or-branch".
+The "success" continuation passed to "or-branch" is simply "or-node"'s "s"
+continuation.  The "failure" continuation passed effects backtracking by
+trying another element of "clause-makers", and is defined as follows:
+	(lambda () (or-node (cdr clause-makers) goal program s f)).
+
+"Or-branch" attempts to unify the current goal with the head of the clause
+chosen by "or-node".  If the unification succeeds, the body of the clause
+is invoked via the "success" continuation passed to "unify", which is as
+follows:
+	(lambda (f) (and-node (clause-body clause) program s f)).
+Otherwise, the "f" continuation will be invoked.
+
+
+Delayed Goals
+-------------
+
+The description of "and-node" above implied that "and-branch" would be
+invoked by "goal-first-try!".  In practice, "goal-first-try!" (defined in
+"goals.ss") invokes "and-branch" (via a "run" continuation passed to it by
+"and-node") only if the goal is ready to execute.  Otherwise, the goal is
+delayed.  This is done by placing it on the delayed-goal list of each of
+the variables involved, as well as in the floundered-goals list (refer to
+"flounder.ss").  A "delay" continuation (passed by "and-node") is then
+invoked, which omits execution of "and-branch" and proceeds directly to
+the invocation of the next goal by "and-node".  The "failure" argument
+passed to the delay continuation will undo the effects of delaying the goal
+before invoking the original "f" continuation from "and-node".
+
+When a variable becomes instantiated, its delayed-goal list is checked
+("var-instantiate!" calls "var-wake-constraints"; see "terms.ss").
+"Wake-constraints" steps through the delayed-goal list, via continuations,
+and invokes "goal-wake-try!" (defined in "goals.ss") for each.  Those goals
+which are now ready to proceed are awakened by "awaken-goal!" (defined in
+"goals.ss"), and those which are not are again delayed, as described above.
+"Awaken-goal!" does not execute a goal immediately, but instead schedules
+it (via "schedule!", defined in "schedule.ss") for execution upon the next
+invocation of "scheduler".  "Unify" invokes "scheduler" as its last action
+after the entire unification has been completed by "unify_quick".  This
+delay in invocation of awakened goals can, in some circumstances, prevent
+multiple invocations of the same goal resulting from multiple bindings
+taking place during the unification.
+
+
+Unification
+-----------
+
+The basic unification algorithm ("unify" in "search.ss") is quite standard.
+The only unusual aspect is that it makes use of "success" and "failure"
+continuations to continue execution upon completion or failure.  If interval
+arithmetic is enabled, "arith-unify" (defined in "Interval/unify.ss") allows
+arithmetic intervals to be unified.
+
+
+Top-Level Driver
+----------------
+
+The top-level driver for the interpreter ("prolog", defined in "programs.ss")
+loads files via "program-load", compiles definitions via "compile" (defined
+in "compile.ss") and accepts and attempts to solve user queries via
+"solve-queries".  A solution to a query is displayed as the query with the
+variables bound appropriately.  Any floundered goals are also displayed.
+"Want-more-solutions?" controls the search for further solutions after the
+first is found.
+
+The "success" continuation passed by "solve-queries" to "and-node" is the
+means by which solutions are displayed and further solutions are (or are not)
+sought.  Specifically, this continuation displays the information described
+above and, if "want-more-solutions?" is true, executes the "failure"
+continuation passed to it in order to force backtracking.  The top-level
+"failure" continuation, passed to "and-branch", simply prints the message,
+"no more solutions".

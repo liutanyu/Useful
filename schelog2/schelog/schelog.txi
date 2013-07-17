@@ -1,0 +1,698 @@
+\input texinfo
+@setfilename schelog.info
+
+@node Top, Schelog, , (dir)
+
+This is a stopgap Top node.  Modify the title of the
+Schelog node (the next node) and insert the file
+schelog.txi into the overall Texinfo file.  If you
+didn't or couldn't do that, and you're viewing me as an
+Info node, press n to go to the Schelog node.
+
+@node Schelog, Schelog copying policy,  Top, Top
+@section Schelog
+
+@lisp
+(require 'schelog)
+@end lisp
+
+Loading the 'schelog feature produces an embedding of
+Prolog in Scheme called Schelog.  There is no need to
+type anything to go from Scheme to Schelog or vice
+versa --- you can use both simultaneously, even to the
+extent of intertwining both languages in the selfsame
+s-expression.  Verily, 'tis the best of both worlds.
+
+@menu
+* Schelog copying policy::
+* Introduction to Schelog::
+* Schelog goals and predicates::
+* Schelog queries::
+* Schelog cut::
+* Schelog logic variables::
+* Schelog unification::
+* Schelog conjunctions and disjunctions::
+* Schelog arithmetic::
+* Schelog types::
+* Other Schelog predicates::
+* Schelog set predicates::
+* Schelog and Scheme::
+* Schelog index::
+@end menu
+
+@node Schelog copying policy, Introduction to Schelog, Schelog, Schelog
+@subsection Schelog copying policy
+
+(c) Dorai Sitaram, dorai@@cs.rice.edu, 1989, Rice University,
+Revised Feb. 1993, Mar. 1994
+
+@table @asis
+@item
+Copying Policies
+
+Schelog is provided free of charge.
+
+You are free to copy and distribute verbatim copies of
+Schelog provided this License Agreement is included,
+provided you don't change the authorship notice that
+heralds each file, and provided you give the recipient(s)
+the same permissions that this agreement allows you.
+
+You are free to modify and distribute modified copies of
+Schelog provided you follow the conditions described above,
+with the further condition that you prominently state the
+changes you made.
+
+@item
+No Warranty
+
+I (Dorai Sitaram) assume no responsibility for any damages
+arising out of using Schelog.  I will of course be willing
+to help, and request users to send bug reports and
+suggestions to Dorai Sitaram, dorai@@cs.rice.edu, so that
+any consequent improvement to the product can be made
+available to all the users of Schelog.
+@end table
+
+@node Introduction to Schelog, Schelog goals and predicates, Schelog copying policy, Schelog
+@subsection Introduction to Schelog
+
+Schelog implements Prolog-style backtracking using
+Scheme's first-class continuations.  Backtracking
+solves a problem or _goal_ by trying to solve its
+_subgoals_.  If a goal is a simple or _atomic_ goal, it
+is solved by matching it with statements or _facts_ in
+a database.  A goal that is solved is said to succeed.
+Alternatively, a goal that succeeds is said to be true.
+A goal that fails is said to be false.  A successful
+goal may be retried to see if it succeeds in another
+way --- this process may be continued till it
+ultimately fails.
+
+A common way of constructing goals is by applying
+_predicates_ to objects.  These objects may be simple
+stuff like numbers, characters, etc., or composite
+structures based on them, like lists, vectors, strings,
+etc.  As we shall see later, Schelog objects can be
+pretty much anything you can conceive of --- including
+operators like Scheme procedures, Schelog predicates
+and Schelog goals.  But first, let's look at logic
+variables, which build the edifice of Schelog.
+
+A logic variable is a mutable binding of a cell to an
+object.  As expected, a logic variable is also a
+Schelog object.  (Note: Logic variables may be bound to
+other logic variables.  As a particular case, a logic
+variable bound to itself is deemed to be an _unbound_
+logic variable.)  For ways of introducing logic
+variables not covered here, see @ref{Schelog logic
+variables}.
+
+In the Schelog embedding, Scheme objects do duty for
+Prolog objects.  The only complication is logic
+variables, so some extra machinery is needed to
+reference and dereference the cells of logic variables
+when viewing Scheme objects as Schelog objects.
+
+@node Schelog goals and predicates, Schelog queries, Introduction to Schelog, Schelog
+@subsection Schelog goals and predicates
+
+@deffn Syntax rel local-logic-variables clause ...
+
+Used for making predicates and goals.
+An example of a goal is the Schelog (_and_ Scheme)
+expression:
+
+@lisp
+(%member x '(1 2 3))
+@end lisp
+
+Here %member is a predicate, x is a logic variable and
+'(1 2 3) is a structure --- the whole expression is a
+goal.  Given the suitably intuitive definition of
+%member, the above goal succeeds if the binding of x is
+1, or 2, or 3.
+
+Now to defining predicates like %member.  Schelog's
+Prolog syntax uses Scheme s-expressions, and as such,
+may need some getting used to.  For example, the member
+predicate in "real" Prolog reads:
+
+@lisp
+member(X, [X|Xs]).
+member(X, [Y|Ys]) :- member(X, Ys).
+@end lisp
+
+The same program in Schelog reads:
+
+@lisp
+(define %member
+  (rel (x xs y ys)
+    [(x (cons x xs))]
+    [(x (cons y ys)) (%member x ys)]))
+@end lisp
+
+I.e., %member is defined as a relation, which is
+specified using the "rel" macro.  rel's first
+subexpression lists all the logic variables local to
+itself.  (Real Prolog doesn't bother specifying this,
+since it uses a capitalization convention to
+distinguish logic variables from everything else, and
+has no notion of lexically hiding logic variables.  In
+contrast, Schelog, in the spirit of Scheme, does not
+enforce a naming convention, and also does not force
+logic variables to have global names.)
+
+rel's subsequent subforms are clauses describing the
+relation.  In this case, the first clause of %member:
+
+@lisp
+[(x (cons x xs))]
+@end lisp
+
+states that (%member x (cons x xs)) is a goal that will
+always succeed.  I.e., if %member's first and second
+arguments can be unified with x and (cons x xs)
+respectively, the first argument is a member of the
+second.  The second clause of %member:
+
+@lisp
+[(x (cons y ys)) (%member x ys)]
+@end lisp
+
+states that (%member x (cons y ys)) is true if x is a
+member of ys.
+
+Here are some _atomic_ goals, which are much simpler
+than (%member 1 '(1 2 3)): The Schelog goal %true is
+defined so that it succeeds once; the Schelog goal
+%fail always fails.
+
+Note that I have used a convention here of naming
+Schelog predicates with an initial %.  This is purely
+for convenience --- in particular, I wanted to avoid
+clashes with Scheme procedure names (there is already a
+Scheme procedure called member).  Note, however, that
+this % convention is not mandatory [_unlike_ Prolog's
+initial capital for variables].  You may flout the %
+convention or replace it with one that is more pleasing
+to you.
+
+Note also that Scheme's cons takes the place of
+Prolog's |.  In general, Scheme's data structures can
+be used without change in Schelog.  In particular,
+each of the following Scheme expressions:
+
+@lisp
+'(1 2 3)  ;with the quote
+
+(list 1 2 3)
+
+(cons 1 (cons 2 (cons 3 '())))
+
+(cons x (list y z)) ;where x, y, z are Scheme (lexical
+                    ;or global) variables bound to 1, 2, 3
+@end lisp
+
+may be used for Prolog's
+
+@lisp
+[1, 2, 3]
+@end lisp
+@end deffn
+
+@deffn Procedure _
+Prolog users will have noted that the variables y and
+ys in the definition of %member needn't have names,
+since they are never needed beyond their single
+occurrence in the %member code.  Schelog, like Prolog,
+lets you use anonymous variables.  Where Prolog uses _,
+Schelog uses (_).  (I.e., _ is a thunk that generates
+an anonymous variable.)  The %member predicate can be
+rewritten as:
+
+@lisp
+(define %member
+  (rel (x xs)
+    [(x (cons x (_)))]
+    [(x (cons (_) xs)) (%member x xs)]))
+@end lisp
+@end deffn
+
+@node Schelog queries, Schelog cut, Schelog goals and predicates, Schelog
+@subsection Schelog queries
+
+@deffn Syntax which queried-logic-variables goal
+The interactive Prolog queries (?-) are handled in
+Schelog through the form "which".  Type a which-query
+just as you would any Scheme expression that you'd want
+to evaluate, i.e., at the Scheme prompt.  The first
+subform of which is a list of the variables whose
+bindings you want --- make it nil if you simply want a
+yes/no answer.  Thus,
+
+@lisp
+(which () (%member 1 '(1 2 3)))
+@end lisp
+
+corresponds to
+
+@lisp
+?- member(1, [1, 2, 3])
+@end lisp
+
+and returns
+
+@lisp
+()
+@end lisp
+
+This means that the goal succeeded, but since no
+variables were requested  in the answer, you get an
+empty list.  To get more solutions, use "more".
+@end deffn
+
+@deffn Procedure more
+
+Typing
+
+@lisp
+(more)
+@end lisp
+
+is like saying "yes" to Prolog's "more?" prompt.
+Here, for instance, typing (more) gives you #f ---
+falsity signifying that there are no alternate
+solutions to this goal.
+
+N.B.: In this case, the distinction between falsity and
+truth for a query with no variables depends on Scheme's
+distinguishing between #f and ().   Thus, the query, as
+stated above, is useless in Scheme dialects where #f
+and () are identical.  Mercifully, this is easily
+remedied --- simply use a dummy variable in the
+which-query: Truth will give an (ignorable) binding for
+the dummy variable, while falsity will give #f.
+
+For another example, consider the query
+
+@lisp
+(which (x) (%member x '(1 2 3)))
+@end lisp
+
+Here you want an instantiations for x that satisfy the
+goal (%member x '(1 2 3)).  Sure enough, the result of
+this is
+
+@lisp
+([x 1])
+@end lisp
+
+viz., a list containing the logic variable bindings
+requested.  Here only one variable (i.e., x) was
+requested, so the result is a singleton list containing
+x's binding.  A binding consists of the variable's name
+and its value, e.g., [x 1].
+
+Typing (more gives more solutions.  To continue with
+the above example:
+
+@lisp
+> (more)
+([x 2])
+
+> (more)
+([x 3])
+
+> (more)
+#f
+@end lisp
+
+The final #f shows that there are no more solutions.
+
+One could also have queries of the form
+
+@lisp
+> (letref (x ...) (which (y ...) query))
+@end lisp
+
+Both letref (see @ref{Schelog logic variables}) and
+which introduce local logic variables (much like
+Scheme's let).  However, in the solutions, only the
+which-variables are enumerated.  E.g.,
+
+@lisp
+> (letref (x) (which () (%member x '(1 2 3))))
+@end lisp
+
+succeeds three times, without giving the values of x.
+
+@lisp
+> (letref (x) (which () (%member x '(1 2 3))))
+()
+> (more)
+()
+> (more)
+()
+> (more)
+()
+> (more)
+#f
+@end lisp
+@end deffn
+
+@node Schelog cut, Schelog logic variables, Schelog queries, Schelog
+@subsection Schelog cut
+
+@deffn Procedure !
+The cut is written !, as in Prolog.  For example, the
+if-then-else predicate, which is written in "real"
+Prolog as:
+
+@lisp
+if_then_else(P, Q, R) :- P, !, Q.
+if_then_else(P, Q, R) :- R.
+@end lisp
+
+has the following look in Schelog:
+
+@lisp
+(define %if-then-else
+  (rel (p q r)
+    [(p q r) p ! q]
+    [(p q r) r]))
+@end lisp
+
+One of the most common use of ! is to implement
+negation:@footnote{People used to first-class this and
+first-class that wouldn't have batted an eyelid over
+the fact that in both the above examples, the
+predicate's arguments range over goals.}
+
+@lisp
+(define %not
+  (rel ()
+    [(g) g ! %fail]
+    [(g) %true]))
+@end lisp
+@end deffn
+
+
+@node Schelog logic variables, Schelog unification, Schelog cut, Schelog
+@subsection Schelog logic variables
+
+As noted, rel's first subform introduces the set of
+logic variables local to the relation's definition.
+Similarly, which's first subform introduces the logic
+variables whose bindings are to be examined.  Logic
+variables are important in Prolog.
+
+In general, logic variables can be made with the thunk
+_, the same procedure used for generating anonymous
+variables.  Thus
+
+@lisp
+(define lv (_))
+@end lisp
+
+makes the Scheme identifier lv refer to a new unbound
+logic variable.
+
+@deffn Syntax letref (ident ...) body
+Local logic variables can be introduced through
+Scheme's various lexical-scoping mechanisms.  For
+convenience, the form letref is provided, where
+
+@lisp
+(letref (x ...) body)
+     expands to
+(let ([x (_)] ...) body)
+@end lisp
+
+I.e., x, ... refer to new logic variables that can be
+used by body.  (The macros rel and which both rely on
+letref to introduce logic variables.)
+
+Note that the logic variable is a Scheme object of
+infinite extent (modulo gc and session termination).
+@end deffn
+
+@node Schelog unification, Schelog conjunctions and disjunctions, Schelog logic variables, Schelog
+@subsection Schelog unification
+
+@deffn Procedure == obj1 obj2
+The predicate == embodies Schelog's unification
+mechanism.  Thus (== x y) is a goal that succeeds if x
+can be unified with y.  For example, the query
+
+@lisp
+(which (x) (== (list 1 2) (list x 2)))
+@end lisp
+
+succeeds with answer
+
+@lisp
+([x 1])
+@end lisp
+@end deffn
+
+@node Schelog conjunctions and disjunctions, Schelog arithmetic, Schelog unification, Schelog
+@subsection Schelog conjunctions and disjunctions
+
+Goals may be combined using the forms %or and %and to
+form compound goals.  E.g.,
+
+@deffn Syntax %and goal ...
+@lisp
+(which (x)
+  (%and (%member x '(1 2 3)) (%lt x 3)))
+@end lisp
+
+requests solutions for x that satisfies both the
+subgoals: i.e., x should be a member of '(1 2 3) _and_
+x should be less than 3.  (%lt is a primitive predicate
+supplied with Schelog.)  The first solution is
+
+@lisp
+([x 1])
+@end lisp
+
+Typing (more) gives another solution:
+
+@lisp
+([x 2])
+@end lisp
+
+and that's it (because [x 3] satisfies the first but not
+the second goal).
+@end deffn
+
+@deffn Syntax %or goal ...
+Similary the query
+
+@lisp
+(which (x)
+  (%or (%member x '(1 2 3)) (%member x '(3 4 5))))
+@end lisp
+
+lists all x that are members of either list.
+
+@lisp
+([x 1])
+([x 2])
+([x 3])
+([x 3])
+([x 4])
+([x 5])
+@end lisp
+
+(Yes, ([x 3]) is listed twice.)
+@end deffn
+
+@node Schelog arithmetic, Schelog types, Schelog conjunctions and disjunctions, Schelog
+@subsection Schelog arithmetic
+
+@deffn Syntax %is obj obj
+The goal (%is x y) succeeds if x can be unified with
+the arithmetic (in fact, any Scheme) expression y.
+Note that %is is not just an abbreviation for ==
+(@ref{Schelog unification}), since the expression need
+not be a Schelog value or structure.  An example will
+make this clear:
+
+@lisp
+(which (x y)
+  (%and	(%is x 2)
+	(%is y (+ x x))))
+@end lisp
+
+succeeds with [x 2] and [y 4].  If the %is's had been
+=='s, the first subgoal (== x 2) would indeed bind x to
+2.  But the second subgoal (== y (+ x x)) would result
+in an error, because Scheme would try to add two
+non-numbers.
+@end deffn
+
+@findex %eq
+@findex %gt
+@findex %ge
+@findex %lt
+@findex %le
+@findex %ne
+
+Other arithmetic goals provided with Schelog are: %eq,
+%gt, %ge, %lt, %le, %ne (abbreviations for equals,
+greater than, etc.)  The usage is:
+
+@lisp
+(%eq x y)
+@end lisp
+
+succeeds if x and y can be unified to the same number.
+Similarly for the other predicates.
+
+@node Schelog types, Other Schelog predicates, Schelog arithmetic, Schelog
+@subsection Schelog types
+
+@deffn Procedure %var obj
+The goal (%var x) succeeds if x is a structure
+that hasn't been completely bound --- i.e., it has at
+least one logic variable in its innards that is
+unbound.
+@end deffn
+
+@deffn  Procedure %nonvar obj
+%var's negation is %nonvar.
+@end deffn
+
+@deffn Procedure %constant obj
+%constant  tests if its argument is
+a non-composite object.
+@end deffn
+
+@deffn Procedure %compound obj
+%constant's negation is %compound.
+@end deffn
+
+@node Other Schelog predicates, Schelog set predicates, Schelog types, Schelog
+@subsection Other Schelog predicates
+
+@deffn Procedure %ident obj obj
+(%ident x y) tests if x and y are identical objects.
+This is not quite ==, for it doesn't touch unbound objects
+the way == does.  E.g., %ident will not equate two
+unbound logic variables, unless they happen to be the
+_identical_ logic variable.
+@end deffn
+
+@deffn Procedure %nonident obj obj
+The negation of %ident is
+%nonident.
+@end deffn
+
+Variables are generally difficult to treat as other
+objects, because they get unified at the merest
+mention.  To avoid this, the predicates %freeze, %melt,
+%melt-new, and %copy are provided.
+
+@deffn Procedure freeze obj obj
+(%freeze s f) unifies f to the frozen version of s ---
+i.e., any lack of bindings in s are preserved no matter
+how much you toss f about.
+@end deffn
+
+@deffn Procedure melt obj obj
+(%melt f s) retrieves the structure frozen in f into s.
+@end deffn
+
+@deffn Procedure melt-new obj obj
+(%melt-new f s) does the same, except that the unbound
+variables in f are replaced by brand new unbound
+variables.
+@end deffn
+
+@deffn Procedure %copy obj obj
+(%copy s c) is (%freeze s f) followed by (%melt-new f
+c).
+@end deffn
+
+@node Schelog set predicates, Schelog and Scheme, Other Schelog predicates, Schelog
+@subsection Schelog set predicates
+
+@deffn Syntax %bag-of obj goal obj
+(%bag-of x goal bag) collects into bag all the values
+of x for which goal succeeds.
+@end deffn
+
+@deffn Syntax %set-of obj goal obj
+%set-of is similar to %bag-of except that duplicates
+are weeded out.
+@end deffn
+
+@deffn Syntax %bag-of-1 obj goal obj
+%bag-of-1 is a variant of %bag-of
+that
+fails if the bag  turns out to be empty.
+@end deffn
+
+@deffn Syntax %set-of-1 obj goal obj
+%set-of-1 is a variant of %set-of that fails if the set
+turns out to be empty.
+@end deffn
+
+@deffn Syntax %exists logic-variable goal
+(%exists y goal) succeeds if there is an instantiation
+of y so that goal succeeds.
+@end deffn
+
+@node Schelog and Scheme, Schelog index ,Schelog set predicates, Schelog
+@subsection Schelog and Scheme
+
+Since Schelog relations are just Scheme procedures, one can
+use lexical scoping to define auxiliary relations, e.g.,
+%reverse using an auxiliary that employs an
+accumulator:
+
+@lisp
+(define %reverse
+  (letrec ((revaux
+	     (rel (x y z w)
+	       ((() y y))
+	       (((cons x y) z w) (revaux y (cons x z) w)))))
+    (rel (x y)
+      ((x y) (revaux x () y)))))
+@end lisp
+
+One is also not tied to the Prolog style --- regular
+Scheme can be used too, treating Prolog relations as
+just another facility used for local convenience along
+with the other facilities of Scheme.  We've already
+seen that there is no difference between Schelog
+objects and Scheme objects.
+
+To carry this one step further, Schelog predicates
+themselves may be written as regular Scheme code,
+without much consideration for the syntactic trappings
+of "rel" and "which" provided here.  To do this, one
+need only exploit the facts that a Schelog goal is
+simply a unary procedure that maps a failure
+continuation to another failure continuation, and that
+unification is the key to unlocking the information in
+logic variables.  Indeed, many of the predicates
+provided with Schelog are coded in this fashion
+directly for efficiency --- and there is no reason why
+your own code can't exploit this tack.  For more on
+this view, you may want to read the code in
+schelog.scm, and read the literature on the subject,
+viz.,
+
+[1] C. Haynes, Logic continuations, J. Logic Program.
+4, 1987, p. 157-176
+
+[2] M. Felleisen, Transliterating Prolog into Scheme,
+tech rept. 182, Indiana U. Comp. Sci. Dept., 1985.
+
+@node Schelog index, ,Schelog and Scheme, Schelog
+@subsection Schelog index
+
+@printindex fn

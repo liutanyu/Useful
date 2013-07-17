@@ -1,0 +1,144 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="Author" CONTENT="Administrateur">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [fr] (Win95; I) [Netscape]">
+   <TITLE>scheme package</TITLE>
+</HEAD>
+<BODY>
+&nbsp;
+<TABLE CELLSPACING=0 CELLPADDING=0 WIDTH="100%" >
+<TR>
+<TD><IMG SRC="logo.gif" HEIGHT=88 WIDTH=52></TD>
+
+<TD>
+<CENTER>
+<H1>
+<FONT COLOR="#000000">scheme package 1.1</FONT></H1></CENTER>
+</TD>
+</TR>
+</TABLE>
+
+<HR WIDTH="100%">
+<H2>
+1 - What is scheme package?</H2>
+scheme package is a <A HREF="../scheme/docs/index.html">Java package</A>
+which provides a Scheme language kernel. <TT>ScmLoader</TT>, <TT>ScmInterpreter
+</TT>and<TT> ScmApplet </TT>are three examples of how to use this package.
+<BR>It contains:
+<UL>
+<LI>
+<TT>scheme.kernel.*</TT> : The classes needed to make the kernel work.</LI>
+
+<LI>
+<TT>scheme.primitives.*</TT> : All the primitives needed by the Scheme
+Report.</LI>
+
+<LI>
+<TT>scheme.extensions.*</TT> : Some features not needed by the Scheme Report.</LI>
+
+<LI>
+<TT>scheme.java.*</TT> : Some interface implementations needed to connect
+Java and Scheme.</LI>
+
+<LI>
+<TT>library/</TT> : Some utility functions (trace, print, remove ...) written
+in Scheme.</LI>
+
+<LI>
+<TT>library/object/</TT> : An object oriented library in Scheme.</LI>
+
+<LI>
+<TT>library/object/java/</TT> : A collection of classes that directly manipulate
+Java classes from Scheme.</LI>
+
+<LI>
+<TT>library/object/java/generated/</TT> : Some Scheme classes that are
+copying the beaviour of corresponding Java classes. These classes have
+been created by loading and running the Scheme source file <TT>library/java-headers.scm</TT>
+(with the command '<TT>java ScmLoader library/library.scm library/java-headers.scm</TT>').</LI>
+
+<LI>
+<TT>misc/ :</TT> Contains files used for the package development. One of
+the most interesting file is <TT>scheme.el</TT>.It is a copy of the Emacs
+Scheme-Mode source file with some modifications. It indents and highlights
+correctly object-oriented and syntax constructs.</LI>
+</UL>
+
+<H2>
+2 - What sort of Scheme does it implement?</H2>
+When you use the class <TT>scheme.kernel.ScmStandardKernel</TT>, the Scheme
+language implemented is r4rs compliant with some limitations:
+<UL>
+<LI>
+Rational and complex numbers are not implemented for performance reasons
+<I>(they are not required by the Scheme Report)</I>,</LI>
+
+<LI>
+integers are small integers (for performance reasons) <I>(bignums are not
+required by the Scheme Report)</I>,</LI>
+
+<LI>
+Numbers starting with #b, #o and #x are not (yet) recognized by the parser,</LI>
+
+<LI>
+r4rs macros are not implemented <I>(they are required only by r5rs)</I>,</LI>
+
+<LI>
+Continuations do not (and will never) work properly since there is no C
+language setjmp/longjmp equivalent in Java. A continuation only works in
+the scope of the <TT>call-with-current-continuation </TT>that has created
+it, otherwise the continuation becomes the top-level's one. It is still
+useful to implement escape and error procedures.</LI>
+</UL>
+<TT>scheme.extensions.ScmExtendedKernel</TT> inherits from the previous
+kernel and adds some extensions:
+<UL>
+<LI>
+A set of function to <A HREF="java_interface.html">call Java methods</A>
+from Scheme.</LI>
+
+<LI>
+An extension to create <A HREF="syntax.html">syntactic objects</A>.</LI>
+
+<LI>
+An <A HREF="sos.html">object oriented system.</A></LI>
+
+<LI>
+Some <A HREF="extensions.html">"standard" extensions</A>.</LI>
+</UL>
+
+<H2>
+3 - The examples.</H2>
+&nbsp;&nbsp;&nbsp; All the examples use the class <TT>ScmExtendedInterpreter
+</TT>to evaluate Scheme expressions. As mentioned above, this class adds
+features to the standard kernel. It is itself an example that shows how
+to create a new Scheme kernel with new predefined procedures written in
+Java.
+<H3>
+&nbsp;&nbsp;&nbsp; a - ScmInterpreter.</H3>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This application is defined
+in 'ScmInterpreter.java'. It implements a simple Scheme language interactive
+interpreter. When executed, it searchs for the file 'Scheme.scm' in the
+current directory, loads and runs it, and starts a top-level loop.
+<H3>
+&nbsp;&nbsp;&nbsp; b - ScmLoader.</H3>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Defined in 'ScmLoader.java',
+this application only loads and runs the Scheme source files given on the
+command line.
+<H3>
+&nbsp;&nbsp;&nbsp; c - ScmApplet.</H3>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This applet is defined in 'ScmApplet.java'.
+It is a simple applet that allows user to interactively evaluate Scheme
+expressions. You can run this applet by opening 'SchemeApplet.html' in
+your favorite HTML browser. You must first create 'scm.jar' (just type
+'make jar' on the command line, or see the command in the file 'Makefile'
+if you do not have the make command installed on you system.
+
+<P>
+<HR WIDTH="100%">
+<ADDRESS>
+&nbsp;<A HREF="mailto:hillion@essi.fr">St&eacute;phane Hillion</A> - 1998</ADDRESS>
+
+</BODY>
+</HTML>

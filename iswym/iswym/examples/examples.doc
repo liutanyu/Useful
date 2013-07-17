@@ -1,0 +1,71 @@
+examples.doc 
+Iswym in Scheme 
+Dorai Sitaram 
+dorai@cs.rice.edu 
+Dec. 1992, Rice University 
+Previous versions: Apr. 1991, Jan. 1992
+
+The files in this directory contain some simple examples
+of the use of run and fcontrol.  To try out an example,
+you should have first loaded Iswym (the file iswym.ss in
+the iswym directory).
+
+prod0.ss
+     prod0 takes a list of numbers and returns their
+     product.  It exploits run/fcontrol to return 0
+     immediately on encountering a 0 in the list.
+
+prefixes.ss
+     all-prefixes takes a list and returns a list of its
+     prefix lists.
+
+fringe.ss
+     same-fringe? takes two trees and returns true if
+     they have the same fringe.  It exploits run/fcontrol
+     to return false immediately on encountering a
+     mismatch.
+
+     N.B.: In this code, '((1 . 2) . 3) and '(1 . (2 .
+     3)) are considered to have the same fringe, as also
+     '((1 2) 3), '(1 (2 3)) and '((1 2) (3)).  I.e., the
+     empty list '(), wherever it occurs in the tree,
+     doesn't contribute any leaves.
+
+corou.ss
+     Defines the coroutine keyword.  A coroutine is
+     specifed as:
+
+          (coroutine <x> . <body>)
+
+     where <x> is the coroutine parameter (for the
+     argument with which the coroutine is first
+     called/resumed) and <body> is the body of the
+     coroutine.  A coroutine is started by calling it
+     with a single argument, as though it were a unary
+     procedure.  The <body> may contain calls to `resume'
+     and `detach'.  (resume c2 v) stops the currently
+     running coroutine, say c, and resumes coroutine c2
+     with the value v.  On resuming coroutine c itself
+     with value v2 , it continues in its body as though
+     the resume expression returned v2.
+
+     A bank of coroutines, c1, c2, ..., may be entered by
+     calling any of the coroutines therein.  The
+     coroutines in the bank use resumes among each other.
+     If any of them uses (detach v), the bank is exited
+     collectively and the value v is returned to the site
+     where the bank was entered.
+
+grune.ss
+     This is an example use of coroutines.  You need to
+     load corou.ss first before loading grune.ss.  Grune
+     contains two filters piped.  The first filter
+     reproduces a stream faithfully but for converting
+     two successive `a's to a single `b'.  The second
+     filter converts two successive `b's to a single `c'.
+      The call (grune) starts the process.  The input
+     stream is the terminal input.  Type symbols, e.g.,
+     a, b, c, etc. at the grune prompt.  Output is
+     generated according to the grune algorithm.  Type
+     `done' when done.
+

@@ -1,0 +1,10 @@
+Set the environment variable SCHEME_LIBRARY_PATH to this
+directory (including trailing /).
+
+Load the init file for your dialect before running code such
+as Schelog or Iswym that depends on this library.
+
+For more library files, obtain the Slib distribution
+maintained by Aubrey Jaffer at altdorf.ai.mit.edu:pub/scm.
+
+--d

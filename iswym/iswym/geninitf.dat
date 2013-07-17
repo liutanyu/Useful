@@ -1,0 +1,23 @@
+;geninitf.dat
+;contains data to be used by geninitf.ss for creating an initfile
+;(c) Dorai Sitaram, Dec. 1992, Rice U.
+
+;name of dialect.  Should be a symbol from among:
+;  chez cscheme elk schemetoc scmj umbscheme other
+
+chez
+
+;name of operating system.  Should be a symbol from among:
+;  dos unix
+
+unix
+
+;string denoting the prefix of the pathname you want for temp
+;files.  E.g., "/tmp/dorai" will give you temp files like
+;/tmp/dorai1, /tmp/dorai2, etc.
+
+"/tmp/dorai"
+
+;string denoting the name you want your initfile to have
+
+"initfile.ss"

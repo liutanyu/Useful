@@ -1,0 +1,117 @@
+Read me first
+*************
+
+readme.doc 
+Iswym in Scheme 
+Dorai Sitaram 
+dorai@cs.rice.edu 
+Dec. 1992, Rice University 
+Previous versions: Apr. 1991, Jan. 1992
+
+The distribution
+================
+
+Unpacking the distribution should give you a directory
+called iswym.  Go to that directory.  One of the files
+therein is readme.doc, which you're currently reading.
+
+Installing Iswym
+================
+
+Create a compatible initfile for your Scheme dialect.  To
+do this, edit the file geninitf.dat to reflect your
+language and system.  Then enter Scheme and type
+
+     (load "geninitf.ss")
+
+This creates initfile.ss.  Once you've created this file,
+you don't need geninitf.ss and geninitf.dat unless you
+migrate to a new dialect.
+
+Starting Iswym
+==============
+
+  1. To get Iswym, enter Scheme and type (load "iswym.ss").
+     This loads initfile.ss and then "mload"s the
+     Iswym-specific files.  (You may edit iswym.ss so
+     that the files are specified by their respective
+     full pathnames.)
+
+  2. After loading iswym.ss, type (iswym-repl).  You are
+     now in the Iswym read-eval-print loop.  Errors will
+     cause exit from the Iswym repl.  Owing to lack of
+     portability, no massaging of Scheme's error
+     mechanism is included that would keep you in the
+     Iswym repl come whatever.  Simply retype
+     (iswym-repl) to get back.
+
+     The Iswym repl's prompt character is the percent
+     sign %.  Rule of thumb: if the prompt sign isn't %,
+     type (iswym-repl) to get into Iswym.
+
+What is Iswym?
+==============
+
+Iswym is a dialect of Scheme.  It provides two control
+operators, viz., fcontrol and run, that aren't standard
+Scheme.
+
+fcontrol
+     Fcontrol takes two arguments, viz., a tag and a
+     unary procedure called the receiver.  If only one
+     argument is supplied, it is considered to be the
+     receiver, with the tag assumed to be #f.
+
+     Fcontrol is the sole procedure that can _cause_
+     control actions.  It does so by sending its argument
+     and its current functional continuation to the
+     nearest dynamically enclosing run that has the same
+     tag as itself.
+
+run
+     Run takes three arguments, viz., a tag, a thunk, and
+     a binary procedure called the handler.  If only two
+     arguments are supplied, they are respectively
+     considered to be the thunk and handler, with the tag
+     assumed to be #f.
+
+     Run invokes its argument thunk and handles, using
+     the handler argument, all control actions that the
+     thunk occasions.
+
+     In the presence of no control action, run simply
+     returns the result of the thunk invocation.  If
+     however, an fcontrol-application takes place, the
+     handler is called on the thrown receiver and
+     continuation.
+
+     The macro % may be used instead of run (to avoid
+     typing (lambda () <exp>) for <exp>).
+
+          (% exp hdlr)     == (run #f  (lambda () exp) hdlr)
+          (% tag exp hdlr) == (run tag (lambda () exp) hdlr)
+
+References
+==========
+
+For further information on the mechanism and use of run
+and fcontrol and other closely related operators, please
+see:
+
+   * Matthias Felleisen.  The Theory and Practice of
+     First-Class Prompts.  POPL '88.
+
+   * Dorai Sitaram and Matthias Felleisen.  Control
+     Delimiters and Their Hierarchies.  Lisp and Symbolic
+     Computation, 1990, 3(1).
+
+   * Dorai Sitaram and Matthias Felleisen.  Reasoning
+     with Continuations II: How to Get Full Abstraction
+     for Models of Control.  L&FP '90.
+
+   * Dorai Sitaram and Matthias Felleisen.  Modeling
+     Continuations without Continuations.  PoPL '91.
+
+   * Dorai Sitaram.  Handling Control.  1992.  (In
+     preparation.)
+

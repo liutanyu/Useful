@@ -1,0 +1,325 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="Author" CONTENT="Administrateur">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [fr] (Win95; I) [Netscape]">
+   <TITLE>Interfacing with Java</TITLE>
+</HEAD>
+<BODY>
+
+<H1>
+Interfacing Scheme and Java</H1>
+
+<HR WIDTH="100%">
+
+<P>The scheme package provides a set of functions and objects to allows
+the user to access Java objects. For this purpose a new Scheme type has
+been added: the java-objects. These features are only available if the
+current kernel is an instance of <TT>scheme.extensions.ScmExtendedKernel</TT>.
+<H2>
+1 - Predefined Java-objects.</H2>
+There are two predefined java-objects:
+<BR>&nbsp;
+<TABLE BORDER >
+<TR>
+<TD><B><TT>*java-null*</TT></B></TD>
+
+<TD>contains the null value</TD>
+</TR>
+
+<TR>
+<TD><B><TT>*java-kernel*</TT></B></TD>
+
+<TD>contains the kernel (an instance of ScmKernel) itself</TD>
+</TR>
+</TABLE>
+
+<H2>
+2 - Predefined functions.</H2>
+Here is the list of all the predefined functions which deal with java-object:
+<BR>&nbsp;
+<TABLE BORDER >
+<TR>
+<TD><TT>(<B>boolean->java-boolean</B> b)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Boolean </TT>object
+initialized with the value of <TT>b</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>char->java-char</B> c)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Character
+</TT>object initialized with the value of <TT>c</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>integer->java-byte</B> i)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Byte </TT>object
+initialized with the value of<TT> i</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>integer->java-int</B> i)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Integer </TT>object
+initialized with the value of<TT> i</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>integer->java-long</B> i)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Long </TT>object
+initialized with the value of<TT> i</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>integer->java-short</B> i)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Short </TT>object
+initialized with the value of<TT> i</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-boolean->boolean</B> j)</TT></TD>
+
+<TD>Returns <TT>#t</TT> or <TT>#f </TT>depending on the value of<TT> j</TT>&nbsp;</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-byte->integer</B> j)</TT></TD>
+
+<TD>Returns an integer initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-char->char</B> j)</TT></TD>
+
+<TD>Returns a character initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-class</B> string)</TT></TD>
+
+<TD>Loads a java class from its full name (ex: <TT>(java-class "java.lang.Integer")</TT>)&nbsp;
+<BR>returns a java-object which represents the loaded class</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-constructor</B> j . L)</TT></TD>
+
+<TD>Loads a constructor of the given class <TT>'j' </TT>and the classes
+of its parameters. All parameters of this function must be java-object
+containing a Java class. Theses objects can be obtained by a call to <TT>java-class</TT>&nbsp;
+<BR>Returns the constructor encapsulated in a java-object.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-double->real</B> j)</TT></TD>
+
+<TD>Returns a real initialized with the value of <TT>j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-field</B> j string)</TT></TD>
+
+<TD>Loads a field (java.lang.reflect.Field) of the given name (<TT>string</TT>)
+and from the class <TT>'j'</TT>. (ex: <TT>(java-field (java-class "java.lang.Integer")
+"TYPE")</TT>)&nbsp;
+<BR>Returns the field encapsulated in a java-object.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-field-get</B> jf jo)</TT></TD>
+
+<TD>The arguments must be java-objects. The first must contains a java.lang.reflect.Field
+and the second must contains a valid object for this field or be <TT>*java-null*</TT>
+if the field is static.&nbsp;
+<BR>Returns the value of the field <TT>'jf'</TT>.&nbsp;</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-field-set</B> jf jo j)</TT></TD>
+
+<TD>Sets the value value of the field <TT>'jf'</TT>. The arguments must
+be java-objects. The first must contains a java.lang.reflect.Field, the
+second must contains a valid object for this field or be <TT>*java-null*</TT>
+and the third must contains a valid value to set to the field.&nbsp;
+<BR>Returns an <TT>#[undefined]</TT> value</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-float->real</B> j)</TT></TD>
+
+<TD>Returns a real initialized with the value of <TT>j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-int->integer</B> j)</TT></TD>
+
+<TD>Returns an integer initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-long->integer</B> j)</TT></TD>
+
+<TD>Returns an integer initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-method</B> j string . L)</TT></TD>
+
+<TD>Loads a method (java.lang.reflect.Method) of the given name (<TT>string</TT>),
+from the class <TT>'j' </TT>and with parameters of the classes L.&nbsp;
+<BR>Returns the method encapsulated in a java-object.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-method-invoke</B> jm jo . L)</TT></TD>
+
+<TD>Invokes the method <TT>'jm' </TT>with this set to <TT>'jo' </TT>and
+with the list of parameters <TT>'L'</TT>.&nbsp;
+<BR>Returns the result in a java-object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-new-instance</B> jc . L)</TT></TD>
+
+<TD>Create a new instance of the class which owns <TT>'jc'</TT>. <TT>'L'
+</TT>is the list of parameters passed to the constructor.&nbsp;
+<BR>Returns the object in a java-object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-object?</B> obj)</TT></TD>
+
+<TD>Returns <TT>#t </TT>if the given object is a java-object, <TT>#f </TT>otherwise</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-object</B> obj)</TT></TD>
+
+<TD>Returns the given object encapulated in a java-object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-short->integer</B> j)</TT></TD>
+
+<TD>Returns an integer initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>java-string->string</B> j)</TT></TD>
+
+<TD>Returns a string initialized with the value of<TT> j</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>real->java-double</B> r)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Double </TT>object
+initialized with the value of<TT> r</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>real->java-float</B> r)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.Float </TT>object
+initialized with the value of<TT> r</TT>&nbsp;
+<BR>returns the created object</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>string->java-string</B> str)</TT></TD>
+
+<TD>Creates a new java-object which contains a <TT>java.lang.String </TT>object
+initialized with the value of<TT> str</TT>&nbsp;
+<BR>Returns the created object</TD>
+</TR>
+</TABLE>
+
+<H2>
+3 - Example.</H2>
+This example is a demonstration of how to use of the previously described
+functions. It shows how to create and display a Frame that contains a Button.
+When we click on this button it calls a given procedure.
+
+<P><FONT COLOR="#993366">;; First we load the needed classes</FONT>
+
+<P><TT>(define jframe&nbsp; (java-class "java.awt.Frame"))</TT>
+<BR><TT>(define jstring (java-class "java.lang.String"))</TT>
+
+<P><FONT COLOR="#993366">;; Now we load the primitive type 'int'</FONT>
+
+<P><TT>(define jinteger&nbsp; (java-class "java.lang.Integer"))</TT>
+<BR><TT>(define int.type&nbsp; (java-field jinteger "TYPE"))</TT>
+<BR><TT>(define jint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (java-field-get int.type
+*java-null*))</TT>
+
+<P><FONT COLOR="#993366">;; We load Frame's constructor and methods</FONT>
+
+<P><TT>(define frame-cons (java-constructor jframe jstring))</TT>
+<BR><TT>(define frame-show (java-method jframe "show"))</TT>
+<BR><TT>(define frame-set-size (java-method jframe "setSize" jint jint))</TT>
+
+<P><FONT COLOR="#993366">;; We can now create an instance of Frame</FONT>
+
+<P><TT>(define the-frame</TT>
+<BR><TT>&nbsp; (java-new-instance</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp; frame-cons</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp; (string->java-string "A Frame created by Scheme")))</TT>
+
+<P><FONT COLOR="#993366">;; It is time to resize and show the frame</FONT>
+
+<P><TT>(java-method-invoke</TT>
+<BR><TT>&nbsp; frame-set-size the-frame</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(integer->java-int 300)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(integer->java-int 400))</TT>
+
+<P><TT>(java-method-invoke frame-show the-frame)</TT>
+<BR>&nbsp;
+<H2>
+4 - The same example in an <A HREF="sos.html">object oriented</A> way.</H2>
+As you can see the functions described above are not very easy to use...
+But if you use the object oriented library given with the scheme package
+the program becomes:
+
+<P><TT>(require 'jframe)</TT>
+
+<P><TT>(define the-frame</TT>
+<BR><TT>&nbsp; (&lt;jframe> create (&lt;jstring> create "A Frame created
+by Scheme")))</TT>
+
+<P><TT>(the-frame set-size! (&lt;jint> create 300)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(&lt;jint> create 400))</TT>
+
+<P><TT>(the-frame show)</TT>
+
+<P><B><I>NOTES:</I></B>
+<BR>- The 'create' method is a library defined method of the class <TT>&lt;class></TT>.
+It creates an object by invoking 'make' and calls the 'init' method of
+this object (all library classes must redefine 'init') with the given parameters.
+<BR>- If you copy this example in a file named 'example.scm' you can run
+it by typing the command:
+
+<P><TT>'java ScmLoader library/library.scm example.scm'</TT>
+
+<P>
+<HR WIDTH="100%">
+<ADDRESS>
+&nbsp;<A HREF="mailto:hillion@essi.fr">St&eacute;phane Hillion</A> - 1998</ADDRESS>
+
+<BR>&nbsp;
+</BODY>
+</HTML>

@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="Author" CONTENT="Administrateur">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [fr] (Win95; I) [Netscape]">
+   <TITLE>Syntactic Objects</TITLE>
+</HEAD>
+<BODY>
+
+<H1>
+Syntactic objects</H1>
+
+<HR WIDTH="100%">
+<BR>The scheme package allows the user to define syntactic objects. Syntactic
+objects are procedures with some differences:
+<UL>
+<LI>
+arguments are passed to the procedure without evaluation,</LI>
+
+<LI>
+they are dynamically scoped.</LI>
+</UL>
+Syntactic objects can be used as argument in all procedure call that needs
+procedure type arguments. They can be used with <B><TT>apply</TT></B>,
+<B><TT>for-each</TT></B>, <B><TT>map</TT></B>, <B><TT>call/cc</TT></B>
+...
+<BR><B><TT>lambda</TT></B>, <B><TT>define</TT></B>, <B><TT>let</TT></B>,
+<B><TT>if</TT></B>, <B><TT>cond</TT></B>, <B><TT>do</TT></B>, <B><TT>set!</TT></B>
+... are built-in syntactic objects.
+<H2>
+1 - Predefined functions.</H2>
+
+<TABLE BORDER >
+<TR>
+<TD><TT>(<A NAME="syntax"></A><B>syntax</B> object object ...)</TT></TD>
+
+<TD>Creates a syntactic procedure. It has the same syntax as <B><TT>lambda</TT></B>.&nbsp;
+<BR>Returns the created syntax.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>syntax?</B> object)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'object' is a syntax.&nbsp; <B><TT>begin</TT></B>,
+<B><TT>define</TT></B>, <B><TT>let</TT></B>, <B><TT>if</TT></B> ... and
+objects created by <B><TT>method</TT></B> and <B><TT>syntax-method</TT></B>
+are syntactic objects. A syntax is also a procedure.</TD>
+</TR>
+
+<TR>
+<TD><A NAME="syntax method"></A><TT>(<B>syntax-method</B> object object
+...)</TT></TD>
+
+<TD>Creates a syntactic method. It has the same syntax as <B><TT><A HREF="sos.html#method">method</A></TT></B>.&nbsp;
+<BR>Returns the created syntax.</TD>
+</TR>
+</TABLE>
+
+<H2>
+2 - Examples.</H2>
+The following example shows how to use <B><TT>syntax</TT></B>. We defines
+a 'while' syntax.
+<BR><I>Note</I>: This definition is tail-recursive (it runs in a constant
+stack space) since <TT>if</TT>, <TT>begin</TT> and <TT>apply</TT> are tail-recursive.
+
+<P><TT>(define while</TT>
+<BR><TT>&nbsp; (syntax (c . L)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp; (if (<A HREF="extensions.html#local-eval">local-eval</A>
+c)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (begin</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (apply begin L)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (apply while c L)))))</TT>
+
+<P>Now we can use it to make iterations:
+
+<P><TT>(let ((n 0))</TT>
+<BR><TT>&nbsp; (while (&lt; n 5)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (display n)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (set! n (+ n 1))))</TT>
+
+<P>The evaluation of the previous expressions produces the output :
+<BR><TT>01234</TT>
+<BR>an returns an unspecified value.
+
+<P>The next example shows how to use <B><TT>syntax-method</TT></B>. This
+syntax is a method of the class <TT>&lt;object></TT> that gets a method
+of the class of the current object (see the <A HREF="sos.html">object model</A>
+of the scheme package for more details).
+
+<P><TT>(&lt;object> <A HREF="sos.html#define">define</A> get-method</TT>
+<BR><TT>&nbsp; (syntax-method (name)</TT>
+<BR><TT>&nbsp;&nbsp;&nbsp; (apply (&lt;class> <A HREF="sos.html#get">get</A>
+get) (this get-class) name '())))</TT>
+
+<P>Now we can use it in the following way:
+
+<P><TT>(define obj (&lt;object> <A HREF="sos.html#make">make</A>))</TT>
+<BR><TT>(obj get-method get-class) ==> #[method get-class]</TT>
+
+<P>
+<HR WIDTH="100%">
+<ADDRESS>
+&nbsp;<A HREF="mailto:hillion@essi.fr">St&eacute;phane Hillion</A> - 1998</ADDRESS>
+
+<BR>&nbsp;
+</BODY>
+</HTML>

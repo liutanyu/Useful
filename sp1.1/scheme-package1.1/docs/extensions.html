@@ -1,0 +1,219 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="Author" CONTENT="Administrateur">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.05 [fr] (Win95; I) [Netscape]">
+   <TITLE>extensions</TITLE>
+</HEAD>
+<BODY>
+
+<H1>
+"Standard" extensions</H1>
+
+<HR WIDTH="100%">
+<H2>
+1 - Output string port extensions.</H2>
+
+<TABLE BORDER WIDTH="100%" >
+<TR>
+<TD><TT>(<B>call-with-input-string</B> string procedure)</TT></TD>
+
+<TD>Calls the given procedure with one argument. This argument is an input
+string port which contains 'string'.&nbsp;
+<BR>Returns the result of the 'procedure' call.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>call-with-output-string</B> procedure)</TT></TD>
+
+<TD>Calls the given procedure with one argument. This argument is a newly
+created output string port.&nbsp;
+<BR>Returns the string the output port produces.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>get-output-string</B> port)</TT></TD>
+
+<TD>Returns the string that 'port', which must be a output string port,
+contains.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>open-input-string</B> string)</TT></TD>
+
+<TD>Returns a new output string port created from 'string'.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>open-output-string</B>)</TT></TD>
+
+<TD>Returns a new empty output port.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>output-string-port?</B> object)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'object' is an output string port, #f otherwise.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>with-input-from-string</B> string procedure)</TT></TD>
+
+<TD>Calls the given procedure without arguments. In the body of this procedure
+<TT>(<B>current-input-port</B>)</TT> returns the string input port created
+from 'string'.&nbsp;
+<BR>Returns the result of the 'procedure' call.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>with-output-to-string</B> procedure)</TT></TD>
+
+<TD>Calls the given procedure without arguments. In the body of this procedure
+<TT>(<B>current-output-port</B>)</TT> returns a local string output port.&nbsp;
+<BR>Returns the string the output port produces.</TD>
+</TR>
+</TABLE>
+
+<H2>
+2 - Bit manipulation.</H2>
+In the scheme package integers are implemented using the Java type 'int'.
+You can use these low-level functions to operate on bits.
+<BR>&nbsp;
+<TABLE BORDER NOSAVE >
+<TR>
+<TD><TT>(<B>bit-and</B> n1 n2)</TT></TD>
+
+<TD>Returns <TT>n1 &amp; n2</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bit-lsh</B> n1 n2)&nbsp;</TT></TD>
+
+<TD>Returns <TT>n1 &lt;&lt; n2</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bit-not</B> n)</TT></TD>
+
+<TD>Returns <TT>~n1</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bit-or</B> n1 n2)</TT></TD>
+
+<TD>Returns <TT>n1 | n2</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bit-rsh</B> n1 n2)</TT></TD>
+
+<TD>Returns <TT>n1 >> n2</TT></TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bit-xor</B> n1 n2)</TT></TD>
+
+<TD>Returns <TT>n1 ^ n2</TT></TD>
+</TR>
+</TABLE>
+
+<H2>
+3 - Miscellaneous extensions.</H2>
+
+<TABLE BORDER WIDTH="100%" >
+<TR>
+<TD><TT>(<B>assert</B> string object ...)</TT></TD>
+
+<TD>Creates an error if the debug mode is on (see <B><TT>debug-on</TT></B>
+and <B><TT>debug-off</TT></B>) and one of the given objects evaluates to
+#f. 'string' must be the name of the current function. If debug mode is
+off the arguments are not evaluated.&nbsp;
+<BR>Returns an undefined value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>autoload</B> symbol string)</TT></TD>
+
+<TD>Creates an autoloadable procedure bounded to 'symbol' in the top-level
+environment. This procedure, when first invoked, causes the loading of
+the file named 'string'.&nbsp;
+<BR>Returns an undefined value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>bound?</B> symbol)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'symbol' is bound to a value in the current environment,
+#f otherwise.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>debug-off</B>)</TT></TD>
+
+<TD>Turns off the debug mode (see <B><TT>assert</TT></B>).&nbsp;
+<BR>Returns an undefined value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>debug-on</B>)</TT></TD>
+
+<TD>Turns on the debug mode (see <B><TT>assert</TT></B>).&nbsp;
+<BR>Returns an undefined value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>eval</B> object)</TT></TD>
+
+<TD>Returns the result of the evaluation of&nbsp; 'object' in the top-level
+environment.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>exit</B>)</TT></TD>
+
+<TD>Kills the Java Virtual Machine.&nbsp;
+<BR>Never returns.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>file-exists?</B> string)</TT></TD>
+
+<TD>Returns #t if the file named 'string' exists, #f otherwise.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<A NAME="local-eval"></A><B>local-eval</B> object)</TT></TD>
+
+<TD>Returns the result of the evaluation of&nbsp; 'object' in the current
+environment.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>promise?</B> object)</TT></TD>
+
+<TD>Returns #t if&nbsp; 'object' is a promise expression (created with
+<B><TT>delay</TT></B>), #f otherwise.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>random</B>)</TT></TD>
+
+<TD>Returns an uniformly distributed random integer value.</TD>
+</TR>
+
+<TR>
+<TD><TT>(<B>time</B> object)</TT></TD>
+
+<TD>Prints the time elapsed while evaluation of the given expression. This
+procedure is a built-in macro: 'object' must not be quoted.&nbsp;
+<BR>Returns the result of the evaluation of the expression.</TD>
+</TR>
+</TABLE>
+
+<HR WIDTH="100%">
+<ADDRESS>
+&nbsp;<A HREF="mailto:hillion@essi.fr">St&eacute;phane Hillion</A> - 1998</ADDRESS>
+
+<BR>&nbsp;
+</BODY>
+</HTML>

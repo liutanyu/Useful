@@ -1,0 +1,39 @@
+copying.doc 
+Iswym in Scheme 
+(c) Dorai Sitaram, Dec. 1992, Rice University 
+Previous versions: Apr. 1991, Jan. 1992 
+dorai@cs.rice.edu
+
+Iswym in Scheme: General Public License
+***************************************
+
+(This file should not be changed.)
+
+Copying Policies
+================
+
+Iswym in Scheme is provided free of charge.
+
+You are free to copy and distribute verbatim copies of
+Iswym in Scheme provided this License Agreement is
+included, provided you don't change the authorship notice
+that heralds each file, and provided you give the
+recipient(s) the same permissions that this agreement
+allows you.
+
+You are free to modify and distribute modified copies of
+Iswym in Scheme provided you follow the conditions
+described above, with the further condition that you
+prominently state the changes you made.
+
+No Warranty
+===========
+
+I (Dorai Sitaram) assume no responsibility for any
+damages arising out of using Iswym in Scheme.  I will of
+course be willing to help, and request users to send bug
+reports and suggestions to Dorai Sitaram,
+dorai@cs.rice.edu, so that any consequent improvement to
+the product can be made available to all the users of
+Iswym in Scheme.
+

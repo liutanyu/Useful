@@ -1,0 +1,27 @@
+				Scheme Prolog 1.2
+				-----------------
+
+	written by John Cleary, Alan Dewar, Vinit Kaushik and Sue Rempel
+	at the University of Calgary (cleary@cpsc.ucalgary.ca).
+
+This package provides a fairly simple interpreter for pure Prolog, implemented
+in Scheme.  It is primarily intended for use in students' projects involving
+implementations of Prolog.  Scheme Prolog version 1.2 is mostly a pure Prolog
+interpreter, though a few built-in primitives are also included.  Delayed goals
+are also supported, and an interval-arithmetic package is included.
+
+The interval arithmetic is a form of constraint solving on real variables.
+It is logically correct in the sense that no solutions to constraints are ever
+rejected.  It deals correctly with rounding and truncation and can solve
+non-linear constraints.
+
+This implementation runs on Chez Scheme and on Elk, and is intended to be
+portable to other Scheme implementations.
+
+Installation instructions and release notes may be found in the file "Release".
+For details on invoking Scheme Prolog and on the built-in routines supported,
+refer to "Manual".  For implementation details, refer to "Impl".  For details
+on the interval-arithmetic package, refer to the following paper:
+
+	Cleary, John G. (1987)  "Logical Arithmetic," Future Computing
+	Systems 2(2) 125-149.

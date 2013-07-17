@@ -1,0 +1,155 @@
+	Description of Scheme Prolog 1.2
+	--------------------------------
+
+Scheme Prolog 1.2 is an interpreter for pure Prolog.  It supports delayed
+goals (i.e., goals which are not executed until certain conditions are met,
+such as certain variables being bound) and is extensible to include predicates
+defined in Scheme.  An interval-arithmetic package is also loaded by default.
+
+	Syntax and Startup Procedure for Scheme Prolog 1.2
+	--------------------------------------------------
+
+The interpreter is invoked by evaluating the following:
+	(pro "file"...)
+where "file"... is a sequence of names of Prolog source files.  The interpreter
+implicitly loads "builtin.pro" (and "interval.pro" if interval arithmetic is
+enabled) before loading the specified files.  Queries pertaining to the loaded
+files are then accepted.  The interpreter is exited by typing "q" to the query
+prompt.
+
+Prolog definitions consist of two parts:  a "when" part and a "what" or "how"
+part.  The "when" part specifies conditions under which a goal can proceed,
+and the "what" or "how" part specifies the meaning of the goal in terms of
+either Prolog (for "what" definitions) or Scheme (for "how" definitions).
+
+Typically, no "when" conditions would be specified, indicating that the goal
+is never delayed.  Such a declaration would have the following form:
+	(when (my-func ?arg1 ?arg2))
+One may also specify conditions of the following forms:
+	(when (my-func ?arg1 ?arg2) (nonvar ?arg1) (nonvar ?arg2))
+	(when (my-func ?arg1 ?arg2) (ground ?arg2))
+Taken together, these two declarations imply that my-func may be executed if
+and only if (a) both of its arguments are instantiated, or (b) its second
+argument is ground.
+
+A "what" definition has the following form:
+	(what (my-func ?arg1 ?arg2) (foo ?arg1) (bar ?arg2) (etc ?arg2))
+	(what (my-func fred ?arg))
+This is equivalent to the following Edinburgh Prolog definition:
+	my-func(Arg1,Arg2) :- foo(Arg1), bar(Arg2), etc(Arg2).
+	my-func(fred,Arg).
+
+Instead of providing a set of "what" clauses, one may provide a single "how"
+clause to define a predicate in Scheme, as follows:
+	(how (my-func ?arg1 ?arg2)
+	     (lambda (goal program s f) (scheme-stuff ...)))
+Only a single "how" clause is permitted.  For further details, refer to the
+file "Impl".
+
+A typical Prolog session looks something like the following:
+
+% scheme
+Scheme ...
+> (load "<prolog-dir>/prolog.ss")
+  ...
+> (pro "<source-files>" ...)
+  ...
+?- q
+bye
+> (exit)
+%
+
+Refer to "ex.pro" for examples of Prolog programs, and to "ex.out" for
+their expected output.
+
+	Primitives Offered by Scheme Prolog 1.2
+	---------------------------------------
+
+[1]	(true)
+	This succeeds unconditionally.
+[2]	(fail)
+	This fails unconditionally.
+[3]	(findall <var-list> <single-goal> <solns>)
+	<var-list> is either a single Prolog variable or
+	a LIST of variable names,
+	and <single-goal> is a single Prolog goal.
+	This predicate unifies <solns> with a list of bindings for <var-list>;
+	each of these bindings is generated as part of the solution to
+	<single-goal>.
+[4]	(not <single-goal>)
+	<single-goal> is a single Prolog goal.
+	The predicate succeeds if <single-goal> fails.
+[5]	(debug)
+	This toggles user-level debugging, i.e., which predicate is being
+	executed/backtracked and its argument terms.
+
+	Built-In Routines for Dealing with Intervals
+	--------------------------------------------
+
+[1]	(add <arg1> <arg2> <arg3>)
+	This implies the constraint that <arg1> + <arg2> = <arg3>.
+[2]	(mult <arg1> <arg2> <arg3>)
+	This implies the constraint that <arg1> * <arg2> = <arg3>.
+[3]	(square <arg1> <arg2>)
+	This implies the constraint that <arg1> * <arg1> = <arg2>.
+[4]	(int <arg>)
+	This implies the constraint that <arg> is an integer.
+[5]	(gt <arg1> <arg2>)
+	This implies the constraint that <arg1> > <arg2>.
+[6]	(geq <arg1> <arg2>)
+	This implies the constraint that <arg1> >= <arg2>.
+[7]	(neq <arg1> <arg2>)
+	This implies the constraint that <arg1> =/= <arg2>.
+[8]	(split <interval>)
+	(split-abs <precision> <interval>)
+	(split-rel <precision> <interval>)
+	(split-machine <interval>)
+	These are control predicates which enable different alternatives
+	to be explored by unifying <interval> to complementary ranges of
+	values whenever possible.  Termination of splitting is controlled
+	by <precision>, or, in the case of split-machine or split (which
+	is actually synonymous with split-machine), by the finest
+	precision representable on the machine.
+[9]	(interval <single-var> <lower-bracket> <lower-bound> <upper-bound>
+		<upper-bracket>)
+	This delays until <single-var> has been instantiated to an arithmetic
+	interval.  Following instantiation, it unifies
+	<lower-bracket> with the lower bound bracket,
+	<lower-bound> with the lower bound value,
+	<upper-bound> with the upper bound value, and
+	<upper-bracket> with the upper bound bracket of (the value of)
+	<single-var>.
+[10]	(monitor <single-var> <exp>)
+	<single-var> is a single Prolog variable.
+	<exp> is "any" displayable Prolog expression.
+	This goal prints out (the value of) <single-var> followed by <exp>
+	whenever <single-var> has its value narrowed (squeezed), and hence
+	can be used for ascertaining the sequence of bindings a Prolog
+	variable goes through.
+
+	Interpretation of Arithmetic Intervals as Displayed in the Answers
+	------------------------------------------------------------------
+	An arithmetic interval is represented as a list of four elements:
+	(<lower-bound-type> <lower-bound-value>
+		<upper-bound-value> <upper-bound-type>)
+	<lower-bound-type> can take the following values:
+		'{' to represent a closed lower bound, and
+		'<' to represent an open lower bound.
+	<upper-bound-type> can take the following values:
+		'}' to represent a closed upper bound, and
+		'>' to represent an open upper bound.
+	<lower-bound-value> and <upper-bound-value> are SPECIAL real
+		numbers representing the values of the bounds--SPECIAL
+		because they can additionally take the following values:
+			'w' denoting +infinity, and
+			'-w' denoting -infinity.
+
+	For example:
+		({ 0 w }) denotes the set of all non-negative real numbers,
+		({ 1 1 }) denotes the integer 1 since it is a point interval,
+		({ -w w }) denotes the set of all real numbers,
+		(< -1.1 1.2 }) denotes the set
+				S = { x: x is Real and -1.1 < x and x <= 1.2 },
+		(< 1.3 1.3 >) denotes the set
+				S = { x: x is Real and 1.3 < x and x < 1.3 },
+				and hence is an empty interval.
